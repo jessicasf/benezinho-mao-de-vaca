@@ -1,18 +1,43 @@
 package br.com.fiap.estoque.model;
 
 import br.com.fiap.produto.model.Produto;
+import jakarta.persistence.*;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 
-public class Estoque {
+@Entity
+@Table(name = "TB_ESTOQUE")
 
+public class Estoque {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SQ_ESTOQUE")
+    @SequenceGenerator(name = "SQ_ESTOQUE", sequenceName = "SQ_ESTOQUE", initialValue = 1, allocationSize = 1)
+    @Column(name = "ID_ESTOQUE")
     private Long id;
 
     //PRODUTO_ESTOCADO
-    private Collection<Produto> produtos = new LinkedHashSet<>();
+    @ManyToMany(fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "TB_ESTOQUE_PRODUTO",
+            joinColumns ={
+                    @JoinColumn(name = "ID_ESTOQUE",
+                            foreignKey =@ForeignKey(name = "FK_ESTOQUE_PRODUTO",
+                                    value = ConstraintMode.CONSTRAINT)
 
+                    )
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(
+                            name = "ID_PRODUTO",
+                            foreignKey = @ForeignKey(name = "FK_PRODUTO_ESTOQUE",
+                            value = ConstraintMode.CONSTRAINT)
+                    )
+            }
+    )
+    private Collection<Produto> produtos = new LinkedHashSet<>();
+    @Column(name = "LOCAL_ESTOQUE")
     private String local;
 
     public Estoque() {
